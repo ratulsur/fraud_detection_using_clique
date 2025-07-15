@@ -4,8 +4,36 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report
 import numpy as np
 import networkx as nx
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 
-# Combining your features & target (X and y)
+# Load dataset
+df = pd.read_csv('card_transdata.csv')  # Replace with data from "https://www.kaggle.com/datasets/dhanushnarayananr/credit-card-fraud"
+
+print(df.head())
+print(df.info())
+print(df['fraud'].value_counts())
+
+from sklearn.model_selection import train_test_split
+
+#   Cleaning boolean columns robustly
+bool_cols = ['repeat_retailer', 'used_chip', 'used_pin_number', 'online_order']
+
+# Best practice: map column by column — safe and warning-free
+for col in bool_cols:
+    df[col] = df[col].map({True: 1, False: 0})
+
+#  Getting rid of NaNs
+df['fraud'] = df['fraud'].fillna(0).astype(int)
+
+# Selecting Features & target
+X = df.drop('fraud', axis=1)
+y = df['fraud']
+
+# Combining our features & target (X and y)
 df = X.copy()
 df['fraud'] = y
 
@@ -151,7 +179,7 @@ plt.show()
 # Picking fraud nodes present in the graph
 fraud_in_graph = [n for n in G.nodes if n in fraud_train_nodes]
 
-# Getting their neighbors as well
+# Getting their next door neighbors 
 fraud_neighbors = set()
 for n in fraud_in_graph:
     fraud_neighbors.update(G.neighbors(n))
